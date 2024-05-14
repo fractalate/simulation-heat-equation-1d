@@ -48,8 +48,18 @@ See [requirements.txt](./requirements.txt) for full dependency details.
 
 ## Running
 
-To run the simulations, run the [simulate.py](./simulate.py) script.
+To run the simulations, run the [simulate.py](./simulate.py) script with the demo you are interested in.
 
 ```
-python3 simulate.py
+python3 simulate.py heat_diffusion
+```
+
+This one will generate `heat_diffusion.mp4` which you can then watch.
+
+## Development
+
+Use GNU make to build the static assets presented in the repository:
+
+```
+make
 ```

@@ -1,8 +1,11 @@
+import sys
+
 import numpy as np
 from scipy import linalg
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
+# TODO: Rename this. This is confusable with sys.
 import system
 
 def print_samples(samples, prefix = '', postfix = ''):
@@ -39,12 +42,12 @@ class SimulationCrankNicholson(Simulation):
     def iterate(self):
         # Solve the tridiagonal matrix with linalg.solve_banded().
         # Instead of being organized as a triangular matrix, the
-        # relevant diagonals are stacked vertically instead.
+        # relevant diagonals are stacked vertically.
         # TODO: a, b, c, and ab can be pre-calculated.
         a = np.full(len(self.samples), -self.r)
         b = np.full(len(self.samples), 1 + 2*self.r)
         c = np.full(len(self.samples), -self.r)
-        a[0] = c[-1] = 0
+        a[0] = c[-1] = 0 # And these elements should be zero.
         ab = np.vstack((a, b, c))
         self.samples = linalg.solve_banded((1, 1), ab, self.samples)
 
@@ -96,12 +99,26 @@ def demo_heat_diffusion():
     ani = FuncAnimation(fig, update, frames=750, blit=True)
     ani.save('heat_diffusion.mp4', writer='ffmpeg', fps=60)
     print('saved heat_diffusion.mp4')
-    #import os
-    #os.system('ffmpeg -y -i heat_diffusion.mp4 -vf "fps=10,scale=320:-1:flags=lanczos" -loop 0 images/heat_diffusion.gif')
+
+demos = {
+    "basic": demo_basic,
+    "heat_diffusion": demo_heat_diffusion,  
+}
+
+def print_usage(file=None):
+    print('Usage: {} [{}]'.format(sys.argv[0], '|'.join(demos.keys())), file=file)
+    print('This will run the simulation with the given name.', file=file)
 
 def main():
-    demo_basic()
-    demo_heat_diffusion()
+    if len(sys.argv) < 2 or len(sys.argv) > 2:
+        print_usage(file=sys.stderr)
+        sys.exit(1)
+    demo = demos.get(sys.argv[1])
+    if demo is None:
+        print_usage(file=sys.stderr)
+        print('Demo named {} not found.'.format(repr(sys.argv[1])), file=sys.stderr)
+        sys.exit(1)
+    demo()
 
 if __name__ == '__main__':
     main()
