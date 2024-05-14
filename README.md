@@ -4,6 +4,10 @@
 
 This is a simulation of the heat equation in one dimension.
 
+<p align="center">
+  <img src="images/heat_diffusion.gif" alt="Heat Diffusion Demo">
+</p>
+
 ## Overview
 
 The heat equation relates the change in temperature over time to changing differences in temperature at a distance. It expressed in the following way

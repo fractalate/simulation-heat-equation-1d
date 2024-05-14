@@ -93,9 +93,11 @@ def demo_heat_diffusion():
         line.set_ydata(sim.samples)
         return line,
 
-    ani = FuncAnimation(fig, update, frames=1000, blit=True)
+    ani = FuncAnimation(fig, update, frames=750, blit=True)
     ani.save('heat_diffusion.mp4', writer='ffmpeg', fps=60)
     print('saved heat_diffusion.mp4')
+    #import os
+    #os.system('ffmpeg -y -i heat_diffusion.mp4 -vf "fps=10,scale=320:-1:flags=lanczos" -loop 0 images/heat_diffusion.gif')
 
 def main():
     demo_basic()
