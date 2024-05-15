@@ -4,6 +4,7 @@ import numpy as np
 from scipy import linalg
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from matplotlib.ticker import FuncFormatter
 
 # TODO: Rename this. This is confusable with sys.
 import system
@@ -25,7 +26,7 @@ class Simulation:
     def iterate(self):
         raise NotImplementedError()
 
-class SimulationCrankNicholson(Simulation):
+class SimulationBackwardDifference(Simulation):
     def __init__(self, samples: np.array, alpha: float, dx: float, dt: float):
         Simulation.__init__(self)
 
@@ -37,7 +38,7 @@ class SimulationCrankNicholson(Simulation):
         self.r: float = alpha * dt / dx**2
 
     def copy(self):
-        return SimulationCrankNicholson(self.samples.copy(), self.alpha, self.dx, self.dt)
+        return SimulationBackwardDifference(self.samples.copy(), self.alpha, self.dx, self.dt)
 
     def iterate(self):
         # Solve the tridiagonal matrix with linalg.solve_banded().
@@ -55,7 +56,7 @@ def setup_basic():
     LENGTH = 0.1
     SAMPLES = 10
     samples = system.example_two_separated_fifths(SAMPLES)
-    return SimulationCrankNicholson(
+    return SimulationBackwardDifference(
         samples,
         alpha = 1,
         dx = LENGTH / SAMPLES,
@@ -76,7 +77,7 @@ def setup_heat_diffusion():
     LENGTH = 0.1
     SAMPLES = 10000
     samples = system.example_two_separated_fifths(SAMPLES)
-    return SimulationCrankNicholson(
+    return SimulationBackwardDifference(
         samples,
         alpha = 1,
         dx = LENGTH / SAMPLES,
@@ -100,9 +101,50 @@ def demo_heat_diffusion():
     ani.save('heat_diffusion.mp4', writer='ffmpeg', fps=60)
     print('saved heat_diffusion.mp4')
 
+# TODO: Maybe make a class to track the samples and its parameters.
+#       There is a little conceptual dissonance since the simulation
+#       takes the alpha parameter, but it's really a property of the
+#       material too (and could vary, but the numerical methods also
+#       vary in that case too).
+SILVER_ROD_LENGTH = 0.10 # meters
+def setup_heat_diffusion_silver():
+    LENGTH = SILVER_ROD_LENGTH
+    SAMPLES = 10000
+    samples = system.example_two_separated_fifths(SAMPLES)
+    return SimulationBackwardDifference(
+        samples,
+        alpha = 1.6563e-4,
+        dx = LENGTH / SAMPLES,
+        dt = 1.0/60.0,
+    )
+
+def demo_heat_diffusion_silver():
+    sim = setup_heat_diffusion_silver()
+
+    fig, ax = plt.subplots()
+
+    # TODO: Port this kind of axis labeling to the other examples.
+    def scale_x(x, pos):
+        return '{:0.1f} cm'.format(x * sim.dx * SILVER_ROD_LENGTH * 100)
+
+    ax.xaxis.set_major_formatter(FuncFormatter(scale_x))
+
+    ax.set_title("Heat Diffusion (Silver)")
+    line, = ax.plot(sim.samples)
+
+    def update(frame_number):
+        sim.iterate()
+        line.set_ydata(sim.samples)
+        return line,
+
+    ani = FuncAnimation(fig, update, frames=600, blit=True)
+    ani.save('heat_diffusion_silver.mp4', writer='ffmpeg', fps=60)
+    print('saved heat_diffusion_silver.mp4')
+
 demos = {
     "basic": demo_basic,
-    "heat_diffusion": demo_heat_diffusion,  
+    "heat_diffusion": demo_heat_diffusion,
+    "heat_diffusion_silver": demo_heat_diffusion_silver,
 }
 
 def print_usage(file=None):
