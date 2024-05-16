@@ -18,6 +18,38 @@ $$
 
 where $u(x, t)$ is a function describing the heat at position $x$ at time $t$ and $\alpha$ is the thermal diffusivity of the medium.
 
+### Methods
+
+#### Finite Difference (Backward)
+
+An expression for $\frac{\partial u}{\partial t}$ is found via taking partial derivative of the Lagrange polynomial approximating $u(x, t)$ with respect to $t$ and expressing it as a backward difference quotient with error term:
+
+$$
+\begin{align*}
+\frac{\partial u}{\partial t}(x_i, t_j) = \frac{u(x_i, t_j) - u(x_i, t_{j-1})}{k} + \frac{k}{2} \frac{\partial^2 u}{\partial x^2}(x_i, \mu_j)
+\end{align*}
+$$
+
+where $t_{j-1} < \mu_j < t_j$.
+
+An expression for $\frac{\partial^2 u}{\partial x^2}$ is found similarly by taking the second partial derivative of the Lagrange polynomial approximating $u(x, t)$ with respect to $x$ and expressing it as a midpoint difference quotient with error term:
+
+$$
+\begin{align*}
+\frac{\partial^2 u}{\partial x^2}(x_i, t_j) = \frac{u(x_{i+1}, t_j) - 2u(x_i, t_j) + u(x_{i-1}, t_j)}{h^2} + \frac{h^2}{12} \frac{\partial^4 u}{\partial x^4}(\xi_i, t_j)
+\end{align*}
+$$
+
+where $x_{i-1} < \xi_i < x_{i+1}$.
+
+Following convention, we let $w_{ij} \approx u(x_i, t_j)$ represent the approximations of $u(x_i, t_j)$. Substituting the expressions found into the differential equation and dropping the truncation error produces the following equation
+
+$$
+\begin{align*}
+\frac{w_{ij} - w_{ij-1}}{k} = \alpha^2 \frac{w_{i+1 j} - 2w_{ij} + w_{i-1 j}}{h^2}.
+\end{align*}
+$$
+
 ### Model
 
 * $u(x)$ is heat at position $x$ in the "rod".
