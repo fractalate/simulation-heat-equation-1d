@@ -1,4 +1,4 @@
-# Simulation Heat Equation (1 Dimension)
+# Simulation of the Heat Equation in One Dimension
 
 (**DRAFT**)
 
@@ -18,11 +18,25 @@ $$
 
 where $u(x, t)$ is a function describing the heat at position $x$ at time $t$ and $\alpha$ is the thermal diffusivity of the medium.
 
-### Methods
+## Method
 
-#### Finite Difference (Backward)
+### Finite Difference, Backward
 
-An expression for $\frac{\partial u}{\partial t}$ is found via taking partial derivative of the Lagrange polynomial approximating $u(x, t)$ with respect to $t$ and expressing it as a backward difference quotient with error term:
+In this method, approximations for the two differential terms are obtained and combined to produce an equation relating one approximate value in the previous step to a linear combination of three approximate values in the next step. This is often expressed as a linear transformation
+
+$$
+\begin{align*}
+A \mathbf{w}^t = \mathbf{w}^{t-1}
+\end{align*}
+$$
+
+where $\mathbf{w}^t$ is a vector representing approximations of $u(x, t)$ at time $t$ and $A$ is the matrix encoding the linear combination for each value in the approximation. To go from step $t-1$ to step $t$, the equation is solved for $\mathbf{w}^t$.
+
+---
+
+Let $h$ be a fixed distance (step length) that we will use for finite differences in $x$. Let $i$ index the $x$ portion of the domain where each $x_i$ has distance $h$ from its preceding and following neighbors. Similarly let $k$ be a fixed duration (time step) that we will use for finite differences in $t$. Let $j$ index the $t$ portion of the domain as equidistant values, $t_j$.
+
+An expression for $\frac{\partial u}{\partial t}$ is found by taking the partial derivative of the Lagrange polynomial approximating $u(x, t)$ at $t_{j-1}$ and $t_j$ with respect to $t$ and expressing it as a backward difference quotient with error term:
 
 $$
 \begin{align*}
@@ -32,7 +46,7 @@ $$
 
 where $t_{j-1} < \mu_j < t_j$.
 
-An expression for $\frac{\partial^2 u}{\partial x^2}$ is found similarly by taking the second partial derivative of the Lagrange polynomial approximating $u(x, t)$ with respect to $x$ and expressing it as a midpoint difference quotient with error term:
+An expression for $\frac{\partial^2 u}{\partial x^2}$ is found similarly by taking the second partial derivative of the Lagrange polynomial approximating $u(x, t)$ at $x_{i-1}$, $x_i$, and $x_{i+1}$ with respect to $x$ and expressing it as a midpoint difference quotient with error term:
 
 $$
 \begin{align*}
@@ -42,28 +56,53 @@ $$
 
 where $x_{i-1} < \xi_i < x_{i+1}$.
 
-Following convention, we let $w_{ij} \approx u(x_i, t_j)$ represent the approximations of $u(x_i, t_j)$. Substituting the expressions found into the differential equation and dropping the truncation error produces the following equation
+Let $w_{ij} \approx u(x_i, t_j)$ represent the approximations of $u(x_i, t_j)$. Substituting the expressions found into the differential equation and dropping the truncation error produces the following equation
 
 $$
 \begin{align*}
-\frac{w_{ij} - w_{ij-1}}{k} = \alpha^2 \frac{w_{i+1 j} - 2w_{ij} + w_{i-1 j}}{h^2}.
+\frac{w_{ij} - w_{ij-1}}{k} = \alpha \frac{w_{i+1 j} - 2w_{ij} + w_{i-1 j}}{h^2}.
 \end{align*}
 $$
 
-### Model
+Let $r$ represent the quantity $\alpha \frac{k}{h^2}$ and the equation can be rearranged into the following form
 
-* $u(x)$ is heat at position $x$ in the "rod".
-* $\alpha$ is the thermal diffusivity of the entire medium, which is constant.
-* The domain of $u$ is split into $N$ bins, each corresponding to a range of uniformly sized intervals around $x$. E.g. if there are $N$ bins and the total "rod" length is 1 cm, then the $i^{\text{th}}$ index satisfies
-  $\frac{1 \, \text{cm}}{N} \cdot i \le x_i < \frac{1 \, \text{cm}}{N} \cdot (i + 1)$.
-* The values for $u(x)$ are stored in an array indexed by $i$.
-* The endpoints of the rod are assumed to be a fixed heat of $0$.
-* The small step in space is labeled $h$, but is named `dx` in the code.
-* The small step in time is labeled $k$, but is named `dt` in the code.
+$$
+\begin{align*}
+(1 + 2r) w_{ij} - r w_{i+1 j} - r w_{i-1 j} = w_{ij-1}.
+\end{align*}
+$$
 
-### Simulation
+which relates three adjacent points at time $t_j$ with one point at time $t_{j-1}$. This can be expressed as a matrix equation
 
-The simulation implements a [](https://en.wikipedia.org/wiki/Finite_difference_method) utilizing the backward difference to calculate the numeric approximations of the evolving heat dispersion over time. This method was chosen for its known stability and well-behaved error term, $O(k + h^2)$.
+$$
+A = 
+\begin{pmatrix}
+1 + 2r &     -r & \cdots &      0 &      0 \\
+    -r & 1 + 2r & \cdots &      0 &      0 \\
+\vdots & \vdots & \ddots & \vdots & \vdots \\
+     0 &      0 & \cdots & 1 + 2r &     -r \\
+     0 &      0 & \cdots &     -r & 1 + 2r
+\end{pmatrix}
+\begin{pmatrix}
+w_{0j} \\
+w_{1j} \\
+\vdots \\
+w_{N-1j} \\
+w_{Nj}
+\end{pmatrix}
+=
+\begin{pmatrix}
+w_{0j-1} \\
+w_{1j-1} \\
+\vdots \\
+w_{N-1j-1} \\
+w_{Nj-1}
+\end{pmatrix}
+$$
+
+or more concisely as $A \textbf{w}^{t} = \textbf{w}^{t-1}$ and "out-of-bounds" elements are treated like $0$ (e.g. $w_{i-1 j}$ when $i = 0$).
+
+Applying the method involves solving the matrix equation for $\mathbf{w}^t$ at each step of the simulation. This is generally an $O(N^3)$ operation, but for a tridiagonal matrix like we have, it can be done as an $O(N)$ operation.
 
 ## Setup
 
