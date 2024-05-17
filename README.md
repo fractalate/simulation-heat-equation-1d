@@ -75,23 +75,19 @@ $$
 which relates three adjacent points at time $t_j$ with one point at time $t_{j-1}$. This can be expressed as a matrix equation
 
 $$
-A = 
 \begin{pmatrix}
 1 + 2r &     -r & \cdots &      0 &      0 \\
     -r & 1 + 2r & \cdots &      0 &      0 \\
 \vdots & \vdots & \ddots & \vdots & \vdots \\
      0 &      0 & \cdots & 1 + 2r &     -r \\
      0 &      0 & \cdots &     -r & 1 + 2r
-\end{pmatrix}
-\begin{pmatrix}
+\end{pmatrix}\begin{pmatrix}
 w_{0j} \\
 w_{1j} \\
 \vdots \\
 w_{N-1j} \\
 w_{Nj}
-\end{pmatrix}
-=
-\begin{pmatrix}
+\end{pmatrix} = \begin{pmatrix}
 w_{0j-1} \\
 w_{1j-1} \\
 \vdots \\
