@@ -10,7 +10,7 @@ This is a simulation of the heat equation in one dimension.
 
 ## Overview
 
-The heat equation relates the change in temperature over time to changing differences in temperature at a distance. It expressed in the following way
+The heat equation relates the change in heat over time to how the heat is changing inside the material. It is expressed in the following way
 
 $$
 \frac{\partial u}{\partial t} = \alpha \frac{\partial^2 u}{\partial x^2}
@@ -22,7 +22,7 @@ where $u(x, t)$ is a function describing the heat at position $x$ at time $t$ an
 
 ### Finite Difference, Backward
 
-In this method, approximations for the two differential terms are obtained and combined to produce an equation relating one approximate value in the previous step to a linear combination of three approximate values in the next step. This is often expressed as a linear transformation
+In this method, approximations for the two differential terms are obtained and combined to produce an equation relating one approximate value in the previous step to a linear combination of three approximate values in the next step. This is often expressed as a matrix equation
 
 $$
 \begin{align*}
