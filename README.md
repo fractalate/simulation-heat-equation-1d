@@ -10,7 +10,7 @@ This is a simulation of the heat equation in one dimension.
 
 ## Overview
 
-The heat equation relates the change in heat over time to how the heat is changing inside the material. It is expressed in the following way
+The heat equation relates the change in heat over time to how the heat varies inside the material. It is expressed in the following way
 
 $$
 \frac{\partial u}{\partial t} = \alpha \frac{\partial^2 u}{\partial x^2}

@@ -6,8 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.ticker import FuncFormatter
 
-# TODO: Rename this. This is confusable with sys.
-import system
+import material
 
 def print_samples(samples, prefix = '', postfix = ''):
     print(prefix + ', '.join(['{:.2f}'.format(s) for s in samples]) + postfix)
@@ -30,32 +29,33 @@ class SimulationBackwardDifference(Simulation):
     def __init__(self, samples: np.array, alpha: float, dx: float, dt: float):
         Simulation.__init__(self)
 
-        self.samples: np.array = samples
+        self.samples: np.array = samples # samples[i] is w_ij
         self.alpha: float = alpha
-        self.dx: float = dx
-        self.dt: float = dt
+        self.dx: float = dx # dx is h
+        self.dt: float = dt # dt is k
 
         self.r: float = alpha * dt / dx**2
+
+        # We'll solve the matrix equation with linalg.solve_banded()
+        # which accepts the diagonals in a stacked form, which we
+        # pre-calculate here.
+        a = np.full(len(self.samples), -self.r)
+        b = np.full(len(self.samples), 1 + 2*self.r)
+        c = np.full(len(self.samples), -self.r)
+        # And these elements should be zero.
+        a[0] = c[-1] = 0
+        self.A = np.vstack((a, b, c))
 
     def copy(self):
         return SimulationBackwardDifference(self.samples.copy(), self.alpha, self.dx, self.dt)
 
     def iterate(self):
-        # Solve the tridiagonal matrix with linalg.solve_banded().
-        # Instead of being organized as a triangular matrix, the
-        # relevant diagonals are stacked vertically.
-        # TODO: a, b, c, and ab can be pre-calculated.
-        a = np.full(len(self.samples), -self.r)
-        b = np.full(len(self.samples), 1 + 2*self.r)
-        c = np.full(len(self.samples), -self.r)
-        a[0] = c[-1] = 0 # And these elements should be zero.
-        ab = np.vstack((a, b, c))
-        self.samples = linalg.solve_banded((1, 1), ab, self.samples)
+        self.samples = linalg.solve_banded((1, 1), self.A, self.samples)
 
 def setup_basic():
     LENGTH = 0.1
     SAMPLES = 10
-    samples = system.example_two_separated_fifths(SAMPLES)
+    samples = material.example_two_separated_fifths(SAMPLES)
     return SimulationBackwardDifference(
         samples,
         alpha = 1,
@@ -76,7 +76,7 @@ def demo_basic():
 def setup_heat_diffusion():
     LENGTH = 0.1
     SAMPLES = 10000
-    samples = system.example_two_separated_fifths(SAMPLES)
+    samples = material.example_two_separated_fifths(SAMPLES)
     return SimulationBackwardDifference(
         samples,
         alpha = 1,
@@ -110,7 +110,7 @@ SILVER_ROD_LENGTH = 0.10 # meters
 def setup_heat_diffusion_silver():
     LENGTH = SILVER_ROD_LENGTH
     SAMPLES = 10000
-    samples = system.example_two_separated_fifths(SAMPLES)
+    samples = material.example_two_separated_fifths(SAMPLES)
     return SimulationBackwardDifference(
         samples,
         alpha = 1.6563e-4,
@@ -141,10 +141,17 @@ def demo_heat_diffusion_silver():
     ani.save('heat_diffusion_silver.mp4', writer='ffmpeg', fps=60)
     print('saved heat_diffusion_silver.mp4')
 
+def demo_test():
+    global demos
+    for demo in demos.values():
+        if demo is not demo_test:
+            demo()
+
 demos = {
     "basic": demo_basic,
     "heat_diffusion": demo_heat_diffusion,
     "heat_diffusion_silver": demo_heat_diffusion_silver,
+    "test": demo_test,
 }
 
 def print_usage(file=None):
