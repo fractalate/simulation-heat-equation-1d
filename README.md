@@ -36,7 +36,7 @@ where $\mathbf{w}^t$ is a vector representing approximations of $u(x, t)$ at tim
 
 Let $h$ be a fixed distance (step length) that we will use for finite differences in $x$. Let $i$ index the $x$ portion of the domain where each $x_i$ has distance $h$ from its preceding and following neighbors. Similarly let $k$ be a fixed duration (time step) that we will use for finite differences in $t$. Let $j$ index the $t$ portion of the domain as equidistant values, $t_j$.
 
-An expression for $\frac{\partial u}{\partial t}$ is found by taking the partial derivative of the Lagrange polynomial approximating $u(x, t)$ at $t_{j-1}$ and $t_j$ with respect to $t$ and expressing it as a backward difference quotient with error term:
+An expression for $\frac{\partial u}{\partial t}$ is found by using the second partial derivative in the series expansion of the Lagrange polynomial approximating $u(x, t)$ at $t_{j-1}$ and $t_j$ with respect to $t$ and expressing it as a backward difference quotient with error term:
 
 $$
 \begin{align*}
@@ -46,7 +46,7 @@ $$
 
 where $t_{j-1} < \mu_j < t_j$.
 
-An expression for $\frac{\partial^2 u}{\partial x^2}$ is found similarly by taking the second partial derivative of the Lagrange polynomial approximating $u(x, t)$ at $x_{i-1}$, $x_i$, and $x_{i+1}$ with respect to $x$ and expressing it as a midpoint difference quotient with error term:
+An expression for $\frac{\partial^2 u}{\partial x^2}$ is found similarly by using the second partial derivative from the series expansion of the Lagrange polynomial approximating $u(x, t)$ at $x_{i-1}$, $x_i$, and $x_{i+1}$ with respect to $x$ and expressing it as a midpoint difference quotient with error term:
 
 $$
 \begin{align*}
